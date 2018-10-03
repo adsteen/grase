@@ -4,13 +4,13 @@
 
 Note that this method simply estimates coverage of genomes in a mixed community; it doesn't take into account efficiency of assembly or accuracy of binning algorithms. It therefore places a lower bound on the sequencing effort that is required to avhieve a given coverage.
 
-# Use
+# Running grase
 
 **grase** can be run over the web or locally. Running over the web is the easiest: navigate to [adsteen.shinyapps.io/grase](http://adsteen.shinyapps.io/grase). Alternately, you can run on your own computer using the following script:
 
 ```
 library(shiny)
-runGitHub("adsteen/grase/grase.gz)
+runGitHub(runGitHub("adsteen/grase")
 ```
 
 **grase** relies on the following packages, which must be installed for it to run locally: **mgcv**, **shiny**, **shinyWidgets**, **dplyr**, **ggplot2**, **scales**.**
