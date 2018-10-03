@@ -13,4 +13,4 @@ library(shiny)
 runGitHub(runGitHub("adsteen/grase")
 ```
 
-**grase** relies on the following packages, which must be installed for it to run locally: **mgcv**, **shiny**, **shinyWidgets**, **dplyr**, **ggplot2**, **scales**.**
+**grase** relies on the following packages, which must be installed for it to run locally: **mgcv**, **shiny**, **shinyWidgets**, **dplyr**, **ggplot2**, **scales**.
