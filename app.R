@@ -12,7 +12,7 @@ library(scales)
 
 # Code that should run at the start of the app
 # load("../data/gam_object_Figure5.rda") # loads an object called fit
-load("GRASE_FIT_OBJECT.rda")
+load("data/GRASE_FIT_OBJECT.rda")
 
 # Set graphical theme
 theme_set(theme_minimal())
@@ -43,30 +43,45 @@ ui <- fluidPage(
   wellPanel(
     titlePanel("Genome Relative Abundance to Sequencing Effort (GRASE)"),
     numericInput(inputId="read_len",
-                 label = "Sequence Read Length",
+                 label = "Sequence Read Length (>25)",
                  value=100,
                  min=25,
                  max=Inf),
-    shinyWidgets::sliderTextInput(inputId="prob",
+    numericInput(inputId="prob",
                  label = "Relative Abundance of Genome (fraction from 0.0001 to 1)",
-                 choices=range.prob,
-                           selected=0.0001,
-                           grid=F),
-    shinyWidgets::sliderTextInput(inputId="gs",
-                                  label = "Genome Size (Mbp)",
-                                  choices=range.gs,
-                                  selected=0.5,
-                                  grid=F),
-    shinyWidgets::sliderTextInput(inputId="target",
-                                  label = "Desired Fraction of Genome to Sequence",
-                                  choices=range.target,
-                                  selected=0.5,
-                                  grid=F),
+                 value=0.0001,
+                 min=0.0001,
+                 max=1),
+    numericInput(inputId="gs",
+                 label = "Genome Size (Mbp; from 0.5 to 20)",
+                 value=5.15,
+                 min=0.5,
+                 max=20),
+    numericInput(inputId="target",
+                 label = "Desired Fraction of Genome to Sequence (fraction from 0.5 to 1)",
+                 value=0.5,
+                 min=0.5,
+                 max=1),
+    # shinyWidgets::sliderTextInput(inputId="prob",
+                 # label = "Relative Abundance of Genome (fraction from 0.0001 to 1)",
+                 # choices=range.prob,
+                           # selected=0.0001,
+                           # grid=F),
+    # shinyWidgets::sliderTextInput(inputId="gs",
+    #                               label = "Genome Size (Mbp)",
+    #                               choices=range.gs,
+    #                               selected=0.5,
+    #                               grid=F),
+    # shinyWidgets::sliderTextInput(inputId="target",
+    #                               label = "Desired Fraction of Genome to Sequence",
+    #                               choices=range.target,
+    #                               selected=0.5,
+    #                               grid=F),
 
     actionButton("est.bp", "Estimate Sequences")
   ),
 
-  tags$h3("Estimated Number of Sequences:"),
+  tags$h3("Estimated Number of Sequences (in millions):"),
   tags$p(),
   tags$h1(textOutput("txt")),
   tags$h3("If you kept the same..."),
@@ -101,7 +116,7 @@ server <- function(input, output,session) {
                            preds_list <- list()
                            main_grid_pred <- data.frame(probability = log(input$prob), genome_size = log(input$gs*1e6), target = input$target^6)
                            preds_list$main.pred <- predict(fit, newdata = main_grid_pred)
-                           text.pred <- scientific(exp(preds_list$main.pred)/input$read_len)
+                           text.pred <- scientific(exp(preds_list$main.pred)/input$read_len/1e6)
 
                          })
 
@@ -114,9 +129,9 @@ server <- function(input, output,session) {
 
    # Plot 1 (what is this?)
    plot1 <- eventReactive(input$est.bp, { #expected bases as a function of probability"
-     d1 <- data.frame(genome_size = log(input$prob*1e6), target = input$target^6, probability = log(range.prob))
+     d1 <- data.frame(genome_size = log(input$gs*1e6), target = input$target^6, probability = log(range.prob))
      d1 <- cbind(d1, data.frame(sequences = exp(predict.gam(fit, newdata = d1))/input$read_len, row.names = NULL))
-     ggplot(d1, aes(x = exp(probability), y = sequences)) +
+     ggplot(d1, aes(x = exp(probability), y = sequences/1e6)) +
        geom_line()+
        labs(x="Genome Relative Abundance",y="Sequences")+
        scale_y_log10()+
@@ -127,7 +142,7 @@ server <- function(input, output,session) {
    plot2 <- eventReactive(input$est.bp, {
      d2 <- data.frame(genome_size = log(range.gs*1e6), target = input$target^6, probability = log(input$prob))
      d2 <- cbind(d2, data.frame(sequences = exp(predict.gam(fit, newdata = d2))/input$read_len, row.names = NULL))
-     ggplot(d2, aes(x = exp(genome_size)/1e6, y = sequences)) +
+     ggplot(d2, aes(x = exp(genome_size)/1e6, y = sequences/1e6)) +
        geom_line()+
        labs(x="Genome Size (Mbp)",y="Sequences")+
        scale_y_log10()+
@@ -138,7 +153,7 @@ server <- function(input, output,session) {
    plot3 <- eventReactive(input$est.bp, {
      d3 <- data.frame(genome_size = log(input$gs*1e6), target = range.target^6, probability = log(input$prob))
      d3 <- cbind(d3, data.frame(sequences = exp(predict.gam(fit, newdata = d3))/input$read_len, row.names = NULL))
-     ggplot(d3, aes(x = target^(1/6), y = sequences)) + 
+     ggplot(d3, aes(x = target^(1/6), y = sequences/1e6)) + 
        geom_line()+
        labs(x="Fractional Genome",y="Sequences")+
        scale_y_log10()+
