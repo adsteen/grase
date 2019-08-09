@@ -12,7 +12,7 @@ library(scales)
 
 # Code that should run at the start of the app
 # load("../data/gam_object_Figure5.rda") # loads an object called fit
-load("data/GRASE_FIT_OBJECT.rda")
+load("GRASE_FIT_OBJECT.rda")
 
 # Set graphical theme
 theme_set(theme_minimal())
